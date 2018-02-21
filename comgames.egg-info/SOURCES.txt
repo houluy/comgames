@@ -1,0 +1,10 @@
+README.md
+setup.py
+comgames/__init__.py
+comgames/game.py
+comgames.egg-info/PKG-INFO
+comgames.egg-info/SOURCES.txt
+comgames.egg-info/dependency_links.txt
+comgames.egg-info/entry_points.txt
+comgames.egg-info/requires.txt
+comgames.egg-info/top_level.txt

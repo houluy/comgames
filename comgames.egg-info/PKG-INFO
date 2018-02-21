@@ -1,0 +1,21 @@
+Metadata-Version: 1.2
+Name: comgames
+Version: 1.0.2
+Summary: Play games in Linux Command-line
+Home-page: https://github.com/houluy/calendar
+Author: Houlu
+Author-email: houlu8674@bupt.edu.cn
+License: MIT
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Keywords: games,command-line
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Requires-Python: >=3
