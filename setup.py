@@ -27,7 +27,7 @@ setup(
     ],
     keywords='games, command-line',
     install_requires=[
-        'chessboardCLI>=1.1.1',
+        'chessboardCLI>=1.2.0',
         'colorline>=1.0.3',
     ],
     python_requires='>=3',

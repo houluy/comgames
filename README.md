@@ -12,4 +12,13 @@ Use `pip` to install this tool
 
 
 ## Usage
+Run `comgames` directly to start the game. Then, input the game name to play.
 
+Supported game list:  
+
++ fourinarow
++ Gomoku
++ tictactoe
++ normal
+
+Normal game allows player to set the size of board and number of winning.

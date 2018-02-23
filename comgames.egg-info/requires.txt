@@ -1,2 +1,2 @@
-chessboardCLI>=1.1.1
+chessboardCLI>=1.2.0
 colorline>=1.0.3
