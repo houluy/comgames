@@ -12,7 +12,8 @@ Use `pip` to install this tool
 
 
 ## Usage
-Run `comgames` directly to start the game. Then, input the game name to play.
+Run `comgames` directly to start the game. Then, input the game name to play.  
+Or `comgames -g {game}` to play.
 
 Supported game list:  
 

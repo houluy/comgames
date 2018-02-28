@@ -1,14 +1,31 @@
 import sys
+import argparse
+from functools import partial
+
 from chessboard import Chessboard, PositionError
 from colorline import cprint
-
-from functools import partial
+import comgames
 
 eprint = partial(cprint, color='r', bcolor='c', mode='highlight')
 
+available_games = [
+    'fourinarow',
+    'Gomoku',
+    'tictactoe',
+    'normal',
+]
+
+parser = argparse.ArgumentParser(description='A colorful calendar', prefix_chars='-+')
+parser.add_argument('-v', '--version', help='show version', version=comgames.__version__, action='version')
+parser.add_argument('-g', '--game', help='Game name', choices=available_games)
+
 def main():
+    args = parser.parse_args()
     while True:
-        game_name = input('Please input the game name: ')
+        if args.game:
+            game_name = args.game
+        else:
+            game_name = input('Please input the game name: ')
         try:
             board = Chessboard(game_name=game_name)
         except ValueError as e:
