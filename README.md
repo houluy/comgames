@@ -23,3 +23,6 @@ Supported game list:
 + normal
 
 Normal game allows player to set the size of board and number of winning.
+
+## Full docs
+Refer to [here](http://chessboardm.readthedocs.io/en/latest/)

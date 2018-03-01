@@ -47,9 +47,10 @@ def main():
             continue
         if pos is True:
             cprint('player {} wins'.format(player_number), color='y', bcolor='b')
-            board.print_pos()
+            board.print_pos(coordinates=board.get_win_list())
             sys.exit(0)
-        board.print_pos(coordinates=pos)
+        else:
+            board.print_pos(coordinates=[pos])
         #print(str(board))
 
 if __name__ == '__main__':

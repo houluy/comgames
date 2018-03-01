@@ -8,3 +8,7 @@ Fix bugs
 
 ## comgames 1.0.3
 Update with chessboardCLI module
+
+## comgames 1.0.4
+Update with chessboardCLI module, add color for winning chesses
+
