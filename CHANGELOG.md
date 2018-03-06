@@ -12,3 +12,5 @@ Update with chessboardCLI module
 ## comgames 1.0.4
 Update with chessboardCLI module, add color for winning chesses
 
+## comgames 1.1.0
+Add Reversi
