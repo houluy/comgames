@@ -1,27 +1,65 @@
-import sys
-import argparse
 from functools import partial
+import sys
 
 from chessboard import Chessboard, PositionError
 from colorline import cprint
-import comgames
 from .Reversi import Reversi
+from . import network
 
 eprint = partial(cprint, color='r', bcolor='c', mode='highlight')
 input_print = partial(cprint, color='g', bcolor='k', end='')
 nprint = partial(cprint, color='r', bcolor='b')
 
-available_games = [
-    'fourinarow',
-    'Gomoku',
-    'tictactoe',
-    'Reversi',
-    'normal',
-]
+class Game:
+    def __init__(self, game_name, online='local', address=None):
+        self.game_name = game_name
+        if self.game_name == 'Reversi':
+            self.game = Reversi()
+        else:
+            self.game = Chessboard(game_name=self.game_name)
+        self.game.print_pos()
+        self.online = online
+        if self.online == 'client':
+            self.seq = 2
+            self.remote = network.Client(**address)
+        elif self.online == 'server':
+            class TCPHandler(socketserver.BaseRequestHandler):
+                def handle(self):
+                    self.data = self.request.recv(100)
+                    return self.data
+            self.seq = 1
+            self.remote = network.Server(**address)
+        
 
-parser = argparse.ArgumentParser(description='A colorful calendar', prefix_chars='-+')
-parser.add_argument('-v', '--version', help='show version', version=comgames.__version__, action='version')
-parser.add_argument('-g', '--game', help='Game name', choices=available_games)
+    def _get_input(self):
+        self.player_str = self.game.get_player_str()
+        input_print('Player {}\'s turn: '.format(self.player_str))
+        ipt = input('')
+        pos = self.game.handle_input(ipt, place=False)
+        return pos
+
+    def _get_remote_pos(self):
+
+
+    def play(self, pos):
+        winning = self.game.set_pos(pos, check=True)
+        if winning is True:
+            nprint('player {} wins'.format(self.player_str))
+            self.game.print_pos(coordinates=self.game.get_win_list())
+            sys.exit(0)
+        else:
+            self.game.print_pos(coordinates=[winning])
+
+    def local_play(self):
+        while True:
+            pos = self._get_input()
+            self.play(pos)
+
+    def online_play(self, pos):
+        if self.seq == 2:
+            self.
+        while True:
+
 
 def play_reversi(r):
     r.print_pos()
@@ -65,42 +103,4 @@ def play_reversi(r):
             r.print_pos()
         end = False
 
-def main():
-    args = parser.parse_args()
-    while True:
-        if args.game:
-            game_name = args.game
-        else:
-            game_name = input('Please input the game name: ')
-        if game_name == 'Reversi':
-            r = Reversi()
-            play_reversi(r)
-        try:
-            board = Chessboard(game_name=game_name)
-        except ValueError as e:
-            eprint(e)
-            continue
-        else:
-            break
 
-    board.print_pos()
-    while True:
-        player_str = board.get_player_str()
-        input_print('Player {}\'s turn: '.format(player_str))
-        ipt = input('')
-        try:
-            pos = board.handle_input(ipt, check=True)
-        except Exception as e:
-            eprint(e)
-            board.print_pos()
-            continue
-        if pos is True:
-            nprint('player {} wins'.format(player_str))
-            board.print_pos(coordinates=board.get_win_list())
-            sys.exit(0)
-        else:
-            board.print_pos(coordinates=[pos])
-        #print(str(board))
-
-if __name__ == '__main__':
-    main()

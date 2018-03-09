@@ -13,12 +13,7 @@ class Client:
     def send(self, data):
         self.socket.send(data.encode())
 
-class TCPHandler(socketserver.BaseRequestHandler):
-    def handle(self):
-        self.data = self.request.recv(100)
-        print(self.data)
-
 class Server(socketserver.ThreadingTCPServer):
-    def __init__(self, host, port):
-        super().__init__((host, port), TCPHandler)
+    def __init__(self, host, port, handler):
+        super().__init__((host, port), handler)
 
