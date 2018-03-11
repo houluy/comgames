@@ -1,48 +1,37 @@
-from functools import partial
 import sys
+import socket
 
 from chessboard import Chessboard, PositionError
-from colorline import cprint
 from .Reversi import Reversi
-from . import network
-
-eprint = partial(cprint, color='r', bcolor='c', mode='highlight')
-input_print = partial(cprint, color='g', bcolor='k', end='')
-nprint = partial(cprint, color='r', bcolor='b')
+from .utils import *
 
 class Game:
-    def __init__(self, game_name, online='local', address=None):
+    def __init__(self, game_name):
         self.game_name = game_name
         if self.game_name == 'Reversi':
             self.game = Reversi()
         else:
             self.game = Chessboard(game_name=self.game_name)
         self.game.print_pos()
-        self.online = online
-        if self.online == 'client':
-            self.seq = 2
-            self.remote = network.Client(**address)
-        elif self.online == 'server':
-            class TCPHandler(socketserver.BaseRequestHandler):
-                def handle(self):
-                    self.data = self.request.recv(100)
-                    return self.data
-            self.seq = 1
-            self.remote = network.Server(**address)
-        
 
-    def _get_input(self):
+    def _get_input(self, raw=False):
         self.player_str = self.game.get_player_str()
         input_print('Player {}\'s turn: '.format(self.player_str))
         ipt = input('')
         pos = self.game.handle_input(ipt, place=False)
         return pos
 
-    def _get_remote_pos(self):
+    def _get_remote_pos(self, sock):
+        data = sock.recv(MAX_LENGTH)
+        return data.decode()
 
+    def _send_pos(self, sock, pos):
+        sock.send(self._pos_str(pos).encode())
 
-    def play(self, pos):
-        winning = self.game.set_pos(pos, check=True)
+    def _pos_str(self, pos):
+        return '{},{}'.format(pos[0], pos[1])
+
+    def _check_win(self, winning):
         if winning is True:
             nprint('player {} wins'.format(self.player_str))
             self.game.print_pos(coordinates=self.game.get_win_list())
@@ -50,16 +39,62 @@ class Game:
         else:
             self.game.print_pos(coordinates=[winning])
 
-    def local_play(self):
-        while True:
-            pos = self._get_input()
-            self.play(pos)
+    def _basic_handle(self, pos, sock=None):
+        winning = self.move(pos)
+        self.game.print_pos(coordinates=[pos])
+        if self.mode != 'local':
+            self._send_pos(sock, pos)
+        self._check_win(winning)
+        return pos
 
-    def online_play(self, pos):
-        if self.seq == 2:
-            self.
-        while True:
+    def _handle_remote_with_pos(self, pos_str):
+        pos = self.game.handle_input(pos_str, place=False)
+        self._basic_handle(pos)
 
+    def _handle_remote(self, sock):
+        pos_str = self._get_remote_pos(sock)
+        self._handle_remote_with_pos(pos_str)
+
+    def _handle_local(self):
+        pos = self._get_input()
+        self._basic_handle(pos)
+
+    def _handle_send(self, sock):
+        pos = self._get_input()
+        self._basic_handle(pos, sock)
+
+    def move(self, pos):
+        return self.game.set_pos(pos, check=True)
+
+    def play(self, mode, **kwargs):
+        self.mode = mode
+        if self.mode == 'local':
+            while True:
+                try:
+                    self._handle_local()
+                except Exception as e:
+                    eprint(e)
+                    continue
+        else:
+            s = kwargs.get('socket')
+            first_move = kwargs.get('first')
+            if self.mode == 'server':
+                self._handle_send(s)
+            if self.mode == 'client':
+                self._handle_remote_with_pos(first_move)
+            while True:
+                try:
+                    pos = self._handle_send(s)
+                except Exception as e:
+                    eprint(e)
+                    continue
+                while True:
+                    try:
+                        self._handle_remote(s)
+                    except Exception as e:
+                        eprint(e)
+                        continue
+                    break
 
 def play_reversi(r):
     r.print_pos()
