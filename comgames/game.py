@@ -19,17 +19,17 @@ class Game:
         input_print('Player {}\'s turn: '.format(self.player_str))
         ipt = input('')
         pos = self.game.handle_input(ipt, place=False)
-        return pos
+        if raw:
+            return ipt
+        else:
+            return pos
 
     def _get_remote_pos(self, sock):
         data = sock.recv(MAX_LENGTH)
         return data.decode()
 
-    def _send_pos(self, sock, pos):
-        sock.send(self._pos_str(pos).encode())
-
-    def _pos_str(self, pos):
-        return '{},{}'.format(pos[0], pos[1])
+    def _send_pos(self, sock, pos_str):
+        sock.send(pos_str.encode())
 
     def _check_win(self, winning):
         if winning is True:
@@ -39,11 +39,8 @@ class Game:
         else:
             self.game.print_pos(coordinates=[winning])
 
-    def _basic_handle(self, pos, sock=None):
+    def _basic_handle(self, pos):
         winning = self.move(pos)
-        self.game.print_pos(coordinates=[pos])
-        if self.mode != 'local':
-            self._send_pos(sock, pos)
         self._check_win(winning)
         return pos
 
@@ -52,6 +49,8 @@ class Game:
         self._basic_handle(pos)
 
     def _handle_remote(self, sock):
+        self.player_str = self.game.get_player_str()
+        nprint('Waiting for the other player to move...')
         pos_str = self._get_remote_pos(sock)
         self._handle_remote_with_pos(pos_str)
 
@@ -60,8 +59,9 @@ class Game:
         self._basic_handle(pos)
 
     def _handle_send(self, sock):
-        pos = self._get_input()
-        self._basic_handle(pos, sock)
+        pos_str = self._get_input(raw=True)
+        self._send_pos(sock, pos_str)
+        self._handle_remote_with_pos(pos_str)
 
     def move(self, pos):
         return self.game.set_pos(pos, check=True)
@@ -78,8 +78,6 @@ class Game:
         else:
             s = kwargs.get('socket')
             first_move = kwargs.get('first')
-            if self.mode == 'server':
-                self._handle_send(s)
             if self.mode == 'client':
                 self._handle_remote_with_pos(first_move)
             while True:
@@ -87,6 +85,7 @@ class Game:
                     pos = self._handle_send(s)
                 except Exception as e:
                     eprint(e)
+                    eprint('Retry please: ')
                     continue
                 while True:
                     try:
@@ -94,7 +93,8 @@ class Game:
                     except Exception as e:
                         eprint(e)
                         continue
-                    break
+                    else:
+                        break
 
 def play_reversi(r):
     r.print_pos()

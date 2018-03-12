@@ -3,6 +3,9 @@ setup.py
 comgames/Reversi.py
 comgames/__init__.py
 comgames/game.py
+comgames/main.py
+comgames/network.py
+comgames/utils.py
 comgames.egg-info/PKG-INFO
 comgames.egg-info/SOURCES.txt
 comgames.egg-info/dependency_links.txt

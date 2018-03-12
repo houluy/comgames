@@ -26,5 +26,18 @@ Supported game list:
 
 Normal game allows player to set the size of board and number of winning.
 
+## Version 1.2
+Add support for online playing, please refer to `comgames -h` to see the help.
+
+### Server
+To host a game, use  
+
+`comgames -g fourinarow --host localhost -p 9876`
+
+### Client
+To connect to a server, use  
+
+`comgames -c localhost:9876`
+
 ## Full docs
 Refer to [here](http://chessboardm.readthedocs.io/en/latest/)

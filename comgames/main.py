@@ -36,7 +36,6 @@ def main():
         game_name = s.recv(MAX_LENGTH).decode()
         nprint('Start playing {} with {}'.format(game_name, (host, port)))
         first_move = s.recv(MAX_LENGTH).decode()
-        print('first_move:{}'.format(first_move))
         mode = 'client'
         kwargs = {
             'socket': s,
