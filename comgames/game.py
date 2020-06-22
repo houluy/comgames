@@ -2,27 +2,41 @@ import sys
 import socket
 
 from chessboard import Chessboard, PositionError
-from .Reversi import Reversi
-from .utils import *
+from comgames.Reversi import Reversi
+from comgames.utils import *
 
 class Game:
     def __init__(self, game_name):
         self.game_name = game_name
+        if self.game_name:
+            if game_name == 'Gomoku':
+                self.board_size = 15
+                self.win = 5
+            elif game_name == 'tictactoe':
+                self.board_size = 3
+                self.win = 3
+            elif game_name == 'fourinarow':
+                self.board_size = 7
+                self.win = 4
+            elif game_name == 'Reversi':
+                self.board_size = 15
+                self.win = -1
+            elif game_name == 'normal':
+                self.board_size = int(input('Board size: '))
+                self.win = int(input('Winning chess number: '))
+            else:
+                raise ValueError('Unsupported game, please refer to docs!')
+        
         if self.game_name == 'Reversi':
             self.game = Reversi()
         else:
-            self.game = Chessboard(game_name=self.game_name)
-        self.game.print_pos()
+            self.game = Chessboard(board_size=self.board_size, win=self.win)
 
-    def _get_input(self, raw=False):
-        self.player_str = self.game.get_player_str()
-        input_print('Player {}\'s turn: '.format(self.player_str))
+    def input_pos(self):
+        input_print('Player {}\'s turn: '.format(self.game.character[self.game.player]))
         ipt = input('')
-        pos = self.game.handle_input(ipt, place=False)
-        if raw:
-            return ipt
-        else:
-            return pos
+        pos = self.game.process_ipt(ipt)
+        return pos
 
     def _get_remote_pos(self, sock):
         data = sock.recv(MAX_LENGTH)
@@ -31,13 +45,12 @@ class Game:
     def _send_pos(self, sock, pos_str):
         sock.send(pos_str.encode())
 
-    def _check_win(self, winning):
-        if winning is True:
-            nprint('player {} wins'.format(self.player_str))
-            self.game.print_pos(coordinates=self.game.get_win_list())
-            sys.exit(0)
+    def celebrate(self, duel=False):
+        if not duel:
+            nprint('Player {} wins'.format(self.game.player_ch))
+            self.game.print_pos(coordinates=self.game.win_list)
         else:
-            self.game.print_pos(coordinates=[winning])
+            nprint('DUEL!')
 
     def _basic_handle(self, pos):
         winning = self.move(pos)
@@ -63,8 +76,28 @@ class Game:
         self._send_pos(sock, pos_str)
         self._handle_remote_with_pos(pos_str)
 
-    def move(self, pos):
-        return self.game.set_pos(pos, check=True)
+    def local_play(self):
+        #self.game.play()
+        finish = False
+        duel = False
+        max_round = self.game.mround()
+        self.game.print_pos()
+        self.game.game_round += 1
+        while not finish:
+            try:
+                pos = self.input_pos()
+            except (ValueError, PositionError) as e:
+                eprint(e)
+                continue
+            self.game.set_pos(pos)
+            self.game.print_pos(coordinates=[pos])
+            finish = self.game.check_win_by_step(pos, player=self.game.player)
+            if self.game.game_round == max_round and not finish:
+                duel = True
+                break
+            if not finish:
+                self.game.game_round += 1
+        self.celebrate(duel)
 
     def play(self, mode, **kwargs):
         self.mode = mode

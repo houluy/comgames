@@ -10,7 +10,7 @@ setup(
     name='comgames',
     version=comgames.__version__,
     description='Play games in Linux Command-line',
-    url='https://github.com/houluy/calendar',
+    url='https://github.com/houluy/comgames',
     author='Houlu',
     author_email='houlu8674@bupt.edu.cn',
     license='MIT',

@@ -2,10 +2,9 @@ import sys
 import argparse
 import socket
 
-import comgames
-from .Reversi import Reversi
-from .game import Game
-from .utils import *
+from __version__ import __version__
+from game import Game
+from utils import *
 
 available_games = [
     'fourinarow',
@@ -16,7 +15,7 @@ available_games = [
 ]
 
 parser = argparse.ArgumentParser(description='A colorful calendar', prefix_chars='-+')
-parser.add_argument('-v', '--version', help='show version', version=comgames.__version__, action='version')
+parser.add_argument('-v', '--version', help='show version', version=__version__, action='version')
 parser.add_argument('-g', '--game', help='Game name', choices=available_games, default='tictactoe')
 parser.add_argument('--host', help='Host a game online')
 parser.add_argument('-p', '--port', help='Port', type=int, default=9999)
