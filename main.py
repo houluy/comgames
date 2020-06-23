@@ -1,4 +1,3 @@
-import comgames.game as game
+import comgames.AI.tictactoeai as ttt
 
-g = game.Game("tictactoe")
-g.local_play()
+

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "44c76158ca4afb724afc9e3c70f83f5c2921d8875603a390fb59f69a0a6fd621"
+            "sha256": "05b2fd266ebe66824349671ee805abbc1e683d01f6d5e6f976144a8db72dd64c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -18,10 +18,10 @@
     "default": {
         "chessboardcli": {
             "hashes": [
-                "sha256:86b892af17e395510d0c39e88542204a18eeaf3f486c62922496d9c4fb038f0f"
+                "sha256:1b18d996907a73d9af9144a4629cc5f4acadfd3c779bfd69eb5588587b5c4b79"
             ],
             "index": "pypi",
-            "version": "==1.3.2"
+            "version": "==1.3.4"
         },
         "colorline": {
             "hashes": [

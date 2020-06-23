@@ -28,14 +28,14 @@ class Game:
                 raise ValueError('Unsupported game, please refer to docs!')
         
         if self.game_name == 'Reversi':
-            self.game = Reversi()
+            self.board = Reversi()
         else:
-            self.game = Chessboard(board_size=self.board_size, win=self.win)
+            self.board = Chessboard(board_size=self.board_size, win=self.win)
 
     def input_pos(self):
-        input_print('Player {}\'s turn: '.format(self.game.character[self.game.player]))
+        input_print('Player {}\'s turn: '.format(self.board.character[self.board.player]))
         ipt = input('')
-        pos = self.game.process_ipt(ipt)
+        pos = self.board.process_ipt(ipt)
         return pos
 
     def _get_remote_pos(self, sock):
@@ -47,10 +47,13 @@ class Game:
 
     def celebrate(self, duel=False):
         if not duel:
-            nprint('Player {} wins'.format(self.game.player_ch))
-            self.game.print_pos(coordinates=self.game.win_list)
+            nprint('Player {} wins'.format(self.board.player_ch))
+            self.board.print_pos(coordinates=self.board.win_list)
         else:
             nprint('DUEL!')
+
+    def move(self, pos):
+        self.board.set_pos(pos, validate=True)
 
     def _basic_handle(self, pos):
         winning = self.move(pos)
@@ -58,11 +61,11 @@ class Game:
         return pos
 
     def _handle_remote_with_pos(self, pos_str):
-        pos = self.game.handle_input(pos_str, place=False)
+        pos = self.board.handle_input(pos_str, place=False)
         self._basic_handle(pos)
 
     def _handle_remote(self, sock):
-        self.player_str = self.game.get_player_str()
+        self.player_str = self.board.get_player_str()
         nprint('Waiting for the other player to move...')
         pos_str = self._get_remote_pos(sock)
         self._handle_remote_with_pos(pos_str)
@@ -77,26 +80,26 @@ class Game:
         self._handle_remote_with_pos(pos_str)
 
     def local_play(self):
-        #self.game.play()
+        #self.board.play()
         finish = False
         duel = False
-        max_round = self.game.mround()
-        self.game.print_pos()
-        self.game.game_round += 1
+        max_round = self.board.mround()
+        self.board.print_pos()
+        self.board.game_round += 1
         while not finish:
             try:
                 pos = self.input_pos()
             except (ValueError, PositionError) as e:
                 eprint(e)
                 continue
-            self.game.set_pos(pos)
-            self.game.print_pos(coordinates=[pos])
-            finish = self.game.check_win_by_step(pos, player=self.game.player)
-            if self.game.game_round == max_round and not finish:
+            self.board.set_pos(pos)
+            self.board.print_pos(coordinates=[pos])
+            finish = self.board.check_win_by_step(pos, player=self.board.player)
+            if self.board.game_round == max_round and not finish:
                 duel = True
                 break
             if not finish:
-                self.game.game_round += 1
+                self.board.game_round += 1
         self.celebrate(duel)
 
     def play(self, mode, **kwargs):
