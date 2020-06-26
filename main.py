@@ -1,3 +1,5 @@
 import comgames.AI.tictactoeai as ttt
 
-ttt.main()
+#ttt.train()
+ttt.run()
+ttt.run("defensive")
