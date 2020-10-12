@@ -5,23 +5,29 @@ import logging
 import pickle
 import json
 
+
 fmt = "%(message)s"
 logging.basicConfig(
     level=logging.DEBUG, format=fmt, filename="logs.log"
 )
 
 import comgames.game
+from .config import tictactoe
 
 
 class Env:
     def __init__(self):
         self.game = comgames.game.Game("tictactoe")
-        self.game.board.print_pos()
         self.max_round = self.game.board.mround()
         self.reward_dic = {
             1: 100,
             -2: 0, # Duel
             0: 0, 
+        }
+        self.finish_state = {
+            "Win": 1,
+            "Tie": 2,
+            "Move": 0,
         }
 
     def _reward(self, result):
@@ -38,30 +44,36 @@ class Env:
     
     def step(self, action):
         self.game.move(action)
-        self.game.board.print_pos(coordinates=[action])
         finish = self.game.board.check_win_by_step(action, player=self.game.board.player)
-        done = False
         if self.game.board.game_round == self.max_round - 1 and not finish:
-            done = True
-            self.game.celebrate(duel=True)
-            return self.game.board.state, self._reward(-2), done, "Duel!"
+            return self.game.board.state, self._reward(-2), self.finish_state["Tie"], "Tie!"
         if finish:
-            done = True
-            self.game.celebrate(duel=False)
-            return self.game.board.state, self._reward(1), done, "Agent wins!"
+            return self.game.board.state, self._reward(1), self.finish_state["Win"], "Agent wins!"
         if not finish:
             self.game.board.game_round += 1
-            return self.game.board.state, self._reward(0), done, "Switch player!"
+            return self.game.board.state, self._reward(0), self.finish_state["Move"], "Switch player!"
 
     def reset(self):
         self.game.board.clear()
 
 
+class Value(UserDict):
+    def __init__(self):
+        super().__init__()
+
+    def _state2str(self, state):
+        return ''.join([str(x) for x in state])
+    
+    def __setitem__(self, key, value):
+        if super().__getitem__(key) < value:
+            super().__setitem__(self._state2str(key), value)
+
+
 class Q(UserDict):
-    def __init__(self, gamma=0.999, alpha=0.01):
+    def __init__(self, gamma=0.9999, alpha=0.9):
+        super().__init__()
         self.gamma = gamma
         self.alpha = alpha
-        super().__init__()
 
     def __str__(self):
         ret_str = []
@@ -112,7 +124,6 @@ class Q(UserDict):
                     temp_Q = self[(next_state, a)]
                     if temp_Q > max_nQ:
                         max_nQ = temp_Q
-            # For non-terminal state: Q(s, a) <- Q(s, a) + alpha[r + gamma * maxQ(s', a') - Q(s, a)]
         else:
             max_nQ = self[(next_state,)]
         self[key] = current_Q + self.alpha*(reward + self.gamma * max_nQ - current_Q)
@@ -136,7 +147,9 @@ class Q(UserDict):
 class Agent:
     def __init__(self, dumped_qfile=None):
         if dumped_qfile is None:
-            self.Q = Q()
+            gamma = tictactoe.get("Q_learning").get("gamma")
+            alpha = tictactoe.get("Q_learning").get("alpha")
+            self.Q = Q(gamma=gamma, alpha=alpha)
         else:
             with open(dumped_qfile, 'rb') as f:
                 self.Q = pickle.load(f)
@@ -146,6 +159,7 @@ class Agent:
         """Initialize an agent with Q instance"""
         inst = cls()
         inst.Q = Q_dic
+        inst.gamma, inst.alpha = Q_dic.gamma, Q_dic.alpha
         return inst
 
     def epsilon_greedy(self, state, actions, epsilon=0.1):
@@ -173,41 +187,38 @@ class Agent:
             return random.choice(action)
 
 
-def train():
-    episodes = 100000
+def Q_learning_train():
+    params = tictactoe.get("Q_learning")
     epsilon = 1
-    min_epsilon = 0.1
-    epsilon_decay = 0.99997
+    min_epsilon = params.get("min_epsilon")
+    epsilon_decay = params.get("epsilon_decay")
+    num_episodes = params.get("num_episodes")
     env = Env()
     agent_off = Agent()
     agent_def = Agent()
 
     # Records
     # Records all Q values
-    offensive_Q_list = [0 for _ in range(episodes)]
-    defensive_Q_list = [0 for _ in range(episodes)]
-    Q_list = [0 for _ in range(episodes)]
+    offensive_Q_list = [0 for _ in range(num_episodes)]
+    defensive_Q_list = [0 for _ in range(num_episodes)]
+    Q_list = [0 for _ in range(num_episodes)]
 
     # Records the winning status
     offensive_win = 0
     defensive_win = 0
-    duel_count = 0
+    tie_count = 0
 
-    for e in range(episodes):
+    for e in range(num_episodes):
         state = env.observation()
-        done = False
+        done = 0
         game_round = 0
-        while not done:
+        while done == 0:
             game_round += 1
             actions = env.actions(state)
             action_off = agent_off.epsilon_greedy(state, actions, epsilon)
             intermediate_state, reward_off, done, info = env.step(action_off)
-            if done: # offensive agent wins or duel
+            if done: # offensive agent wins or tie
                 reward_def = -reward_off
-                if reward_off == env.reward_dic[1]:
-                    offensive_win += 1
-                else:
-                    duel_count += 1
                 agent_off.Q.update(state, action_off, intermediate_state, reward_off) 
                 agent_def.Q.update(last_inter_state, action_def, intermediate_state, reward_def)
             else: # turn of defensive agent
@@ -219,11 +230,7 @@ def train():
                 game_round += 1
                 action_def = agent_def.epsilon_greedy(intermediate_state, actions, epsilon)
                 next_state, reward_def, done, info = env.step(action_def)
-                if done: # defensive agent wins or duel
-                    if reward_def == env.reward_dic[1]:
-                        defensive_win += 1
-                    else:
-                        duel_count += 1
+                if done: # defensive agent wins or tie
                     reward_off = -reward_def
                     agent_def.Q.update(intermediate_state, action_def, next_state, reward_def)
                     agent_off.Q.update(state, action_off, next_state, reward_off)
@@ -251,7 +258,7 @@ def train():
         json.dump(defensive_Q_list, f)
     with open("Q/Q_sum.json", "w") as f:
         json.dump(Q_list, f)
-    logging.info(f"Offensive wins for {offensive_win} times, defensive wins for {defensive_win} times, duels for {duel_count} times")
+    logging.info(f"Offensive wins for {offensive_win} times, defensive wins for {defensive_win} times, ties for {tie_count} times")
   
 
 def run(turn="offensive"):
@@ -259,12 +266,11 @@ def run(turn="offensive"):
         trained_Q = pickle.load(f)
     agent = Agent.by_Q(trained_Q)
     env = Env()
-    done = False
-    duel = False
+    done = 0
     game_round = 0
     env.game.board.print_pos()
     state = env.observation()
-    while not done:
+    while done == 0:
         game_round += 1
         if turn == "offensive":
             actions = env.actions(state) 
@@ -272,15 +278,18 @@ def run(turn="offensive"):
         elif turn == "defensive":
             action = env.game.input_pos() # Be careful, no exception handlers here
         state, _, done, info = env.step(action)
+        env.game.board.print_pos(coordinates=[action])
+        env.game.celebrate(done)
         if done:
             break
-        else:
-            if turn == "offensive":
-                action = env.game.input_pos() # Be careful, no exception handlers here
-            elif turn == "defensive":
-                actions = env.actions(state) 
-                action = agent.greedy(state, actions)
-            next_state, _, done, info = env.step(action)
+        if turn == "offensive":
+            action = env.game.input_pos() # Be careful, no exception handlers here
+        elif turn == "defensive":
+            actions = env.actions(state) 
+            action = agent.greedy(state, actions)
+        next_state, _, done, info = env.step(action)
+        env.game.board.print_pos(coordinates=[action])
+        env.game.celebrate(done)
         state = next_state[:]
     
 

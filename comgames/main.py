@@ -1,28 +1,11 @@
 import sys
-import argparse
 import socket
 
-from __version__ import __version__
-from game import Game
-from utils import *
+from comgames.game import Game
+from comgames.utils import *
 
-available_games = [
-    'fourinarow',
-    'Gomoku',
-    'tictactoe',
-    'Reversi',
-    'normal',
-]
 
-parser = argparse.ArgumentParser(description='A colorful calendar', prefix_chars='-+')
-parser.add_argument('-v', '--version', help='show version', version=__version__, action='version')
-parser.add_argument('-g', '--game', help='Game name', choices=available_games, default='tictactoe')
-parser.add_argument('--host', help='Host a game online')
-parser.add_argument('-p', '--port', help='Port', type=int, default=9999)
-parser.add_argument('-c', '--connect', help='Connect to a server, \'host:port\'')
-
-def main():
-    args = parser.parse_args()
+def main(args):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if args.connect:
         host, port = args.connect.split(':')
@@ -55,8 +38,15 @@ def main():
             mode = 'server'
             kwargs['socket'] = sock
     game = Game(game_name=game_name)
-    game.play(mode=mode, **kwargs)
+    if game_name == "fourinarow":
+        game.play_fourinarow()
+    else:
+        game.local_play()
     s.close()
 
-if __name__ == '__main__':
-    main()
+
+def local_main(args):
+    game_name = args.game
+    game = Game(game_name=game_name)
+    game.local_play()
+

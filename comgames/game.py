@@ -1,5 +1,6 @@
 import sys
 import socket
+import logging
 
 from chessboard import Chessboard, PositionError
 from comgames.Reversi import Reversi
@@ -8,6 +9,7 @@ from comgames.utils import *
 class Game:
     def __init__(self, game_name):
         self.game_name = game_name
+        self.logger = logging.getLogger(__name__)
         if self.game_name:
             if game_name == 'Gomoku':
                 self.board_size = 15
@@ -16,6 +18,9 @@ class Game:
                 self.board_size = 3
                 self.win = 3
             elif game_name == 'fourinarow':
+                """Four in a row has a typical rule that only column number needs to be determined
+                by players!
+                """
                 self.board_size = 7
                 self.win = 4
             elif game_name == 'Reversi':
@@ -32,11 +37,14 @@ class Game:
         else:
             self.board = Chessboard(board_size=self.board_size, win=self.win)
 
+    def debug(self, *args):
+        for a in args:
+            self.logger.debug(a)
+
     def input_pos(self):
         input_print('Player {}\'s turn: '.format(self.board.character[self.board.player]))
         ipt = input('')
-        pos = self.board.process_ipt(ipt)
-        return pos
+        return ipt
 
     def _get_remote_pos(self, sock):
         data = sock.recv(MAX_LENGTH)
@@ -45,12 +53,14 @@ class Game:
     def _send_pos(self, sock, pos_str):
         sock.send(pos_str.encode())
 
-    def celebrate(self, duel=False):
-        if not duel:
+    def celebrate(self, done=0):
+        if done == 0:
+            return
+        elif done == 1:
             nprint('Player {} wins'.format(self.board.player_ch))
             self.board.print_pos(coordinates=self.board.win_list)
         else:
-            nprint('DUEL!')
+            nprint('TIE!')
 
     def move(self, pos):
         self.board.set_pos(pos, validate=True)
@@ -80,15 +90,18 @@ class Game:
         self._handle_remote_with_pos(pos_str)
 
     def local_play(self):
-        #self.board.play()
         finish = False
-        duel = False
+        done = 1
         max_round = self.board.mround()
         self.board.print_pos()
         self.board.game_round += 1
         while not finish:
             try:
-                pos = self.input_pos()
+                ipt = self.input_pos()
+                if self.game_name == "fourinarow":
+                    pos = self.board.process_single_ipt(ipt)
+                else:
+                    pos = self.board.process_ipt(ipt)
             except (ValueError, PositionError) as e:
                 eprint(e)
                 continue
@@ -96,11 +109,11 @@ class Game:
             self.board.print_pos(coordinates=[pos])
             finish = self.board.check_win_by_step(pos, player=self.board.player)
             if self.board.game_round == max_round and not finish:
-                duel = True
+                done = 2
                 break
             if not finish:
                 self.board.game_round += 1
-        self.celebrate(duel)
+        self.celebrate(done)
 
     def play(self, mode, **kwargs):
         self.mode = mode
