@@ -7,7 +7,7 @@ url = "https://pypi.org/simple"
 
 [packages]
 colorline = "*"
-chessboardcli = "==1.3.6"
+chessboardcli = "==1.3.7"
 
 [requires]
 python_version = "3.6"
