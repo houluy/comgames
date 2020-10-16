@@ -3,7 +3,8 @@ import comgames.game
 
 class Env:
     def __init__(self, game_name):
-        self.game = comgames.game.Game(game_name)
+        self.game_name = game_name
+        self.game = comgames.game.Game(self.game_name)
         self.max_round = self.game.board.mround()
         self.reward_dic = {
             1: 100,
@@ -26,7 +27,11 @@ class Env:
         return 
 
     def actions(self, state):
-        return self.game.board.positions(self.game.board.state2board(state))
+        board = self.game.board.state2board(state)
+        if self.game_name == "fourinarow":
+            return self.game.board.columns(board)
+        else:
+            return self.game.board.positions(board)
     
     def step(self, action):
         self.game.move(action)
