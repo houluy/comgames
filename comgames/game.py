@@ -62,8 +62,16 @@ class Game:
         else:
             nprint('TIE!')
 
+    def column2pos(self, column):
+        "Convert column to position, using the topmost row"
+        row = self.board.get_row_by_column(column)
+        return (row - 1, column)
+
     def move(self, pos):
+        if self.game_name == "fourinarow":
+            pos = self.column2pos(pos)
         self.board.set_pos(pos, validate=True)
+        return pos
 
     def _basic_handle(self, pos):
         winning = self.move(pos)

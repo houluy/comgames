@@ -34,8 +34,10 @@ class Env:
             return self.game.board.positions(board)
     
     def step(self, action):
-        self.game.move(action)
-        finish = self.game.board.check_win_by_step(action, player=self.game.board.player)
+        self.game.board.game_round += 1
+        pos = self.game.move(action)
+        self.game.board.print_pos(coordinates=[pos])
+        finish = self.game.board.check_win_by_step(pos, player=self.game.board.player)
         if self.game.board.game_round == self.max_round - 1 and not finish:
             return self.game.board.state, self._reward(-2), self.finish_state["Tie"], "Tie!"
         if finish:
