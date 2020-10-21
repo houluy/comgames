@@ -56,9 +56,14 @@ class TestFourinarowEnv(unittest.TestCase):
         self.env.step(3)
         state, reward, done, info = self.env.step(3)
         assert_state = test_state[:]
-        assert_state[-7:-4] = 1
-        assert_state[-14:-11] = 2
-        print(state[-7:-4])
+        assert_state[-7:-3] = [1, 2, 1, 1]
+        assert_state[-12:-10] = [2, 2]
         self.assertEqual(state, assert_state)
-
+        # Test win
+        self.env.step(2)
+        self.env.step(0)
+        self.env.step(2)
+        state, reward, done, info = self.env.step(1)
+        self.assertEqual(done, 1)
+        self.assertEqual(reward, 100)
 

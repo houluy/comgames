@@ -2,7 +2,7 @@ import sys
 import socket
 import logging
 
-from chessboard import Chessboard, PositionError
+from comgames.chessboard import Chessboard, PositionError
 from comgames.Reversi import Reversi
 from comgames.utils import *
 
@@ -65,7 +65,7 @@ class Game:
     def column2pos(self, column):
         "Convert column to position, using the topmost row"
         row = self.board.get_row_by_column(column)
-        return (row - 1, column)
+        return (row, column)
 
     def move(self, pos):
         if self.game_name == "fourinarow":

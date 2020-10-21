@@ -6,6 +6,7 @@ class Env:
         self.game_name = game_name
         self.game = comgames.game.Game(self.game_name)
         self.max_round = self.game.board.mround()
+        self.verbose = True
         self.reward_dic = {
             1: 100,
             -2: 10, # Duel
@@ -34,9 +35,9 @@ class Env:
             return self.game.board.positions(board)
     
     def step(self, action):
-        self.game.board.game_round += 1
         pos = self.game.move(action)
-        self.game.board.print_pos(coordinates=[pos])
+        if self.verbose:
+            self.game.board.print_pos(coordinates=[pos])
         finish = self.game.board.check_win_by_step(pos, player=self.game.board.player)
         if self.game.board.game_round == self.max_round - 1 and not finish:
             return self.game.board.state, self._reward(-2), self.finish_state["Tie"], "Tie!"
