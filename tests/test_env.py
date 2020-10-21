@@ -17,6 +17,25 @@ class TestTictactoeEnv(unittest.TestCase):
             (0, 2), (1, 2), (2, 2)
         ])
 
+    def test_step(self):
+        self.env.reset()
+        action = (0, 0)
+        state, reward, done, info = self.env.step(action)
+        self.assertEqual(state, [1, 0, 0, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(reward, 0)
+        self.assertEqual(done, 0)
+        action = (0, 1)
+        self.env.step(action)
+        action = (1, 1)
+        self.env.step(action)
+        action = (1, 2)
+        self.env.step(action)
+        action = (2, 2)
+        state, reward, done, info = self.env.step(action)
+        self.assertEqual(state, [1, 2, 0, 0, 1, 2, 0, 0, 1])
+        self.assertEqual(reward, 100)
+        self.assertEqual(done, 1)
+
 
 class TestFourinarowEnv(unittest.TestCase):
     def setUp(self):
