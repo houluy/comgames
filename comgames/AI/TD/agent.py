@@ -1,4 +1,4 @@
-from 
+from .Q import Q
 
 class TDAgent:
     def __init__(self, dumped_qfile=None):
