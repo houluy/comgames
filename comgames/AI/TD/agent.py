@@ -1,19 +1,22 @@
+import random
+
 from .Q import Q
+from comgames.AI.config import config
 
 class TDAgent:
-    def __init__(self, dumped_qfile=None):
+    def __init__(self, game_name=None, dumped_qfile=None):
         if dumped_qfile is None:
-            gamma = tictactoe.get("Q_learning").get("gamma")
-            alpha = tictactoe.get("Q_learning").get("alpha")
+            gamma = config.get(game_name).get("Q_learning").get("gamma")
+            alpha = config.get(game_name).get("Q_learning").get("alpha")
             self.Q = Q(gamma=gamma, alpha=alpha)
         else:
             with open(dumped_qfile, 'rb') as f:
                 self.Q = pickle.load(f)
 
     @classmethod
-    def by_Q(cls, Q_dic: Q):
+    def by_Q(cls, game_name, Q_dic: Q):
         """Initialize an agent with Q instance"""
-        inst = cls()
+        inst = cls(game_name)
         inst.Q = Q_dic
         inst.gamma, inst.alpha = Q_dic.gamma, Q_dic.alpha
         return inst

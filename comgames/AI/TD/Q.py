@@ -1,4 +1,5 @@
 from collections import UserDict
+from collections.abc import Iterable, MutableSequence
 
 
 class Q(UserDict):
@@ -59,6 +60,9 @@ class Q(UserDict):
         else:
             max_nQ = self[(next_state,)]
         self[key] = current_Q + self.alpha*(reward + self.gamma * max_nQ - current_Q)
+
+    def n_step_update(self, state, action, n_state, reward, steps, actions=None):
+        pass
 
     def sum(self):
         val = 0

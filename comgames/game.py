@@ -42,9 +42,13 @@ class Game:
             self.logger.debug(a)
 
     def input_pos(self):
+        """ Get position from input """
         input_print('Player {}\'s turn: '.format(self.board.character[self.board.player]))
         ipt = input('')
-        return ipt
+        if self.game_name == "fourinarow":
+            return self.board.process_single_ipt(ipt)
+        else:
+            return self.board.process_ipt(ipt)
 
     def _get_remote_pos(self, sock):
         data = sock.recv(MAX_LENGTH)
