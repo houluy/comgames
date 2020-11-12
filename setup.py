@@ -2,14 +2,14 @@ from setuptools import setup, find_packages
 
 from codecs import open
 from os import path
-import comgames 
+import src
 
 here = path.abspath(path.dirname(__file__))
 
 setup(
     name='comgames',
-    version=comgames.__version__,
-    description='Play games in Linux Command-line',
+    version=src.__version__,
+    description='Play games in Linux Command-line with AI',
     url='https://github.com/houluy/comgames',
     author='Houlu',
     author_email='houlu8674@bupt.edu.cn',
@@ -33,7 +33,7 @@ setup(
     python_requires='>=3',
     entry_points={
         'console_scripts': [
-            'comgames = comgames.main:main',
+            'comgames = src.main:main',
         ],
     }
 )
