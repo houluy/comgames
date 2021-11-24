@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f2d30f5468dca6783d8309bcc4a7fd44c102e34f568b2a5cf41e3eed278df3db"
+            "sha256": "451b11e15b7e6d32d6cc438f954260451cf716e8eaf000559cfaa3e864822de2"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -32,5 +32,14 @@
             "version": "==1.0.3"
         }
     },
-    "develop": {}
+    "develop": {
+        "bashplotlib": {
+            "hashes": [
+                "sha256:9e92e968594436fd631d0ec21c7be45796b173979c07090a441774579baee000",
+                "sha256:b1b59be49d6254a5bd808919e0a23a75a703a02e7e84478edda765714e0bfaee"
+            ],
+            "index": "pypi",
+            "version": "==0.6.5"
+        }
+    }
 }

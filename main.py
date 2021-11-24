@@ -4,7 +4,7 @@
 #ttt.run()
 #ttt.run("defensive")
 from comgames.__version__ import __version__
-import comgames.main as m
+import comgames.play.main as m
 import argparse
 
 available_games = [
@@ -12,6 +12,12 @@ available_games = [
     'Gomoku',
     'tictactoe',
     'Reversi',
+]
+
+available_algos = [
+    "QLearning",
+    "SARSA",
+    "ExpectedSARSA",
 ]
 
 game_list = '\n- '.join([
@@ -27,7 +33,13 @@ parser.add_argument('-g', '--game', help='Game name', choices=available_games, d
 parser.add_argument('--host', help='Host a game online')
 parser.add_argument('-p', '--port', help='Port', type=int, default=9999)
 parser.add_argument('-c', '--connect', help='Connect to a server, \'host:port\'')
+parser.add_argument('--ai', help='Play with AI.', action="store_true")
+parser.add_argument('-t', '--train', help='Train an agent.', action="store_true")
+parser.add_argument('-a', '--algorithm', help='Specify algorithms', choices=available_algos)
+#parser.add_argument('-n', '--new', help='Create a new agent.', action="store_true")
+
 args = parser.parse_args()
 
 #m.main(args)
-m.local_main(args)
+m.main(args)
+

@@ -4,6 +4,7 @@ name = "pypi"
 url = "https://pypi.org/simple"
 
 [dev-packages]
+bashplotlib = "*"
 
 [packages]
 colorline = "*"
